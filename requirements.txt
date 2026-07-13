@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+openai
+python-docx
+pdfplumber
+PyMuPDF
+python-dotenv
+streamlit
+pydantic
+chromadb
+jinja2
+firebase-admin
+pyrebase4
+playwright

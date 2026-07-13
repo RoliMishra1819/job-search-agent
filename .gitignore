@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+.env
+resumes/generated/*
+database/*
+*.db
+firebase-service-account.json
+resumes/master_resume.docx
+resumes/generated/
+cover_letters/
+backdate_test.py
+test_app.py

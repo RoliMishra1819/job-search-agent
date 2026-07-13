@@ -7,20 +7,31 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Firebase Admin SDK (for Firestore database access) ---
-SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "..", "firebase-service-account.json")
+import json
+import streamlit as st
 
 if not firebase_admin._apps:
-    cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
+    if "firebase_service_account" in st.secrets:
+        # Running on Streamlit Cloud — credentials come from secrets
+        service_account_info = dict(st.secrets["firebase_service_account"])
+        cred = credentials.Certificate(service_account_info)
+    else:
+        # Running locally — use the local JSON file
+        SERVICE_ACCOUNT_PATH = os.path.join(os.path.dirname(__file__), "..", "firebase-service-account.json")
+        cred = credentials.Certificate(SERVICE_ACCOUNT_PATH)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
 # --- Pyrebase (for email/password auth) ---
+firebase_api_key = st.secrets.get("FIREBASE_API_KEY", os.getenv("FIREBASE_API_KEY"))
+firebase_project_id = st.secrets.get("FIREBASE_PROJECT_ID", os.getenv("FIREBASE_PROJECT_ID"))
+
 firebase_config = {
-    "apiKey": os.getenv("FIREBASE_API_KEY"),
-    "authDomain": f"{os.getenv('FIREBASE_PROJECT_ID')}.firebaseapp.com",
-    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
-    "storageBucket": f"{os.getenv('FIREBASE_PROJECT_ID')}.appspot.com",
+    "apiKey": firebase_api_key,
+    "authDomain": f"{firebase_project_id}.firebaseapp.com",
+    "projectId": firebase_project_id,
+    "storageBucket": f"{firebase_project_id}.appspot.com",
     "databaseURL": "",  # not using Realtime Database, only Firestore
 }
 

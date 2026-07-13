@@ -11,14 +11,17 @@ from matcher import match_resume_to_jd
 
 load_dotenv()
 import streamlit as st
+
+try:
+    groq_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+except Exception:
+    groq_key = os.getenv("GROQ_API_KEY")
+
 client = OpenAI(
     base_url="https://api.groq.com/openai/v1",
-    api_key=st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY")),
-)
+    api_key=groq_key,
     max_retries=0,
 )
-
-
 def sanitize_filename(name: str) -> str:
     name = re.sub(r"[^\w\s-]", "", name).strip()
     return re.sub(r"[\s]+", "_", name)

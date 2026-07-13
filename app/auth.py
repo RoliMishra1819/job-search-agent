@@ -11,7 +11,12 @@ import json
 import streamlit as st
 
 if not firebase_admin._apps:
-    if "firebase_service_account" in st.secrets:
+    try:
+        has_secret = "firebase_service_account" in st.secrets
+    except Exception:
+        has_secret = False
+
+    if has_secret:
         # Running on Streamlit Cloud — credentials come from secrets
         service_account_info = dict(st.secrets["firebase_service_account"])
         cred = credentials.Certificate(service_account_info)
@@ -24,8 +29,12 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 # --- Pyrebase (for email/password auth) ---
-firebase_api_key = st.secrets.get("FIREBASE_API_KEY", os.getenv("FIREBASE_API_KEY"))
-firebase_project_id = st.secrets.get("FIREBASE_PROJECT_ID", os.getenv("FIREBASE_PROJECT_ID"))
+try:
+    firebase_api_key = st.secrets.get("FIREBASE_API_KEY", os.getenv("FIREBASE_API_KEY"))
+    firebase_project_id = st.secrets.get("FIREBASE_PROJECT_ID", os.getenv("FIREBASE_PROJECT_ID"))
+except Exception:
+    firebase_api_key = os.getenv("FIREBASE_API_KEY")
+    firebase_project_id = os.getenv("FIREBASE_PROJECT_ID")
 
 firebase_config = {
     "apiKey": firebase_api_key,

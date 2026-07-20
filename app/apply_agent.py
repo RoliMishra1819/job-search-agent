@@ -62,12 +62,65 @@ def autofill_greenhouse(job_url: str, resume_json: dict, resume_file_path: str, 
         browser.close()
 
 
+def autofill_lever(job_url: str, resume_json: dict, resume_file_path: str, cover_letter_path: str = None):
+    """
+    Opens a Lever job application page and auto-fills common fields.
+    Leaves the browser open for the user to review and submit manually.
+    """
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=False)
+        page = browser.new_page()
+        page.goto(job_url, timeout=30000)
+        page.wait_for_load_state("networkidle")
+
+        filled_fields = []
+
+        # Lever's common field selectors (name-based, fairly stable across companies)
+        field_map = {
+            'input[name="name"]': resume_json.get("name", ""),
+            'input[name="email"]': resume_json.get("email", ""),
+            'input[name="phone"]': resume_json.get("phone", ""),
+            'input[name="urls[LinkedIn]"]': resume_json.get("linkedin", ""),
+            'input[name="urls[GitHub]"]': resume_json.get("github", ""),
+        }
+
+        for selector, value in field_map.items():
+            if value:
+                try:
+                    if page.locator(selector).count() > 0:
+                        page.fill(selector, value)
+                        filled_fields.append(selector)
+                except Exception:
+                    pass
+
+        # Resume upload (Lever typically uses name="resume")
+        try:
+            if page.locator('input[name="resume"]').count() > 0:
+                page.set_input_files('input[name="resume"]', resume_file_path)
+                filled_fields.append("resume (file)")
+        except Exception:
+            pass
+
+        print(f"Auto-filled fields: {filled_fields}")
+        print("Browser left open for review. Custom questions need your manual input.")
+        print("Please check the form, fill remaining fields, then submit manually.")
+        input("Press Enter here to close the browser when done...")
+
+        browser.close()
+
+
 if __name__ == "__main__":
-    # Test with a placeholder — replace with a real Greenhouse job URL to test
     test_resume = {
         "name": "Roli Mishra",
         "email": "roli85756@gmail.com",
         "phone": "8869944959",
+        "linkedin": "www.linkedin.com/in/roli-mishra",
     }
-    test_url = input("Paste a Greenhouse job application URL to test: ")
-    autofill_greenhouse(test_url, test_resume, "resumes/master_resume.docx")
+    platform = input("Test which platform? (greenhouse/lever): ").strip().lower()
+    test_url = input("Paste the job application URL: ")
+    if platform == "greenhouse":
+        autofill_greenhouse(test_url, test_resume, "resumes/master_resume.docx")
+    elif platform == "lever":
+        autofill_lever(test_url, test_resume, "resumes/master_resume.docx")
+    else:
+        print("Unknown platform")

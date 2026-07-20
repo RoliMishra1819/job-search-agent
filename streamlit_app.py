@@ -109,9 +109,12 @@ def dashboard():
                     remoteok_jobs += fetch_remoteok_jobs(keyword=term, limit=10)
                     arbeitnow_jobs += fetch_arbeitnow_jobs(keyword=term, limit=10)
 
+                from job_search import fetch_offcampusjobs4u_jobs
+                offcampus_jobs = fetch_offcampusjobs4u_jobs(limit=30)
+
                 seen_urls = set()
                 unique_jobs = []
-                for job in remoteok_jobs + arbeitnow_jobs:
+                for job in remoteok_jobs + arbeitnow_jobs + offcampus_jobs:
                     if job["url"] not in seen_urls:
                         seen_urls.add(job["url"])
                         unique_jobs.append(job)
@@ -120,6 +123,15 @@ def dashboard():
 
                 found_count = 0
                 for job in candidates:
+                    if "offcampusjobs4u.com" in job.get("url", ""):
+                        try:
+                            from job_search import fetch_offcampusjobs4u_article_details
+                            details = fetch_offcampusjobs4u_article_details(job["url"])
+                            job["description"] = details["content"]
+                            job["url"] = details["apply_url"]
+                        except Exception:
+                            pass
+
                     description = job.get('description', '')[:800]
                     jd_text = f"{job['title']} at {job['company']}. {description}. Tags: {', '.join(job['tags'])}"
                     try:

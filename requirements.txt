@@ -12,3 +12,4 @@ jinja2
 firebase-admin
 pyrebase4
 playwright
+beautifulsoup4

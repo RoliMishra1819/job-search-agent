@@ -11,3 +11,4 @@ resumes/generated/
 cover_letters/
 backdate_test.py
 test_app.py
+secrets_output.txt

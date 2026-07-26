@@ -19,6 +19,15 @@ if not firebase_admin._apps:
     if has_secret:
         # Running on Streamlit Cloud — credentials come from secrets
         service_account_info = dict(st.secrets["firebase_service_account"])
+
+        # TEMPORARY DEBUG — remove after diagnosing
+        pk = service_account_info.get("private_key", "")
+        st.write("DEBUG private_key_id:", service_account_info.get("private_key_id"))
+        st.write("DEBUG private_key length:", len(pk))
+        st.write("DEBUG private_key starts:", repr(pk[:60]))
+        st.write("DEBUG private_key ends:", repr(pk[-60:]))
+        st.write("DEBUG newline count in key:", pk.count(chr(10)))
+
         cred = credentials.Certificate(service_account_info)
     else:
         # Running locally — use the local JSON file
